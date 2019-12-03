@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>crud</title>
+    <link rel="stylesheet" href="./movie.css">
+</head>
+
+<body>
+    <dialog>
+        <form>
+            <label for="title">Title:</label>
+            <input id="title" name="title">
+            <br>
+            <label for="releaseDate">Release Date:</label>
+            <input id="releaseDate" name="release_date">
+            <br>
+            <label for="rating">Rating</label>
+            <select id="rating" name="rating">
+                <option value="#">--select your rating--</option>
+                <option value="G">G</option>
+                <option value="PG">PG</option>
+                <option value="PG-13">PG-13</option>
+                <option value="R">R</option>
+            </select>
+            <br>
+            <input type="button" value="Save" id="save">
+            <input type="button" value="Cancel" id="cancel">
+
+        </form>
+    </dialog>
+
+    <h1> Big List of Movies</h1>
+
+    <input type="button" value="+" id="add_movie">
+
+    <ul>
+    </ul>
+
+
+    <script type="text/javascript" src="./styleMovie.js"> </script>
+
+</body>
+
+</html>
