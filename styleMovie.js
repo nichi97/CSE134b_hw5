@@ -4,7 +4,12 @@ const addBtn = document.querySelector("#add_movie");
 const form = document.querySelector("form");
 
 const dialog = document.querySelector("#editMovie");
-const [title_elem, releaseDate_elem, rating_elem, saveBtn, cancelBtn] = [...form];
+const [title_elem, releaseDate_elem, rating_elem, saveBtn, cancelBtn] = [
+  ...form
+];
+
+// global var to set which element should be deleted
+let currDeleteLi = null;
 
 const para = document.createElement("p");
 let titleStr, dateStr, ratingStr;
@@ -13,12 +18,13 @@ let editNum;
 let isFirst = true;
 let leapFlag = true;
 
-// check if the local storage is empty. If so, display the string 
+// check if the local storage is empty. If so, display the string
 // saying that there is nothing in the list
 const checkEmpty = () => {
+  const noMoviePrompt = document.querySelector("#noMoviePrompt");
   if (localStorage.movieList.length == 2) {
     para.innerText = "-- There is no movie in the list -- ";
-    ul.appendChild(para);
+    noMoviePrompt.appendChild(para);
   } else {
     para.remove();
   }
@@ -51,6 +57,13 @@ const removeArr = pos => {
   window.localStorage.setItem("movieList", JSON.stringify(storage));
 };
 
+const deleteLi = li => {
+  li.remove();
+  removeArr(li.getAttribute("data-position"));
+  updateIndex();
+  checkEmpty();
+};
+
 // create a button given an id and a value
 const createBtn = (id, value) => {
   let btn = document.createElement("input");
@@ -62,7 +75,7 @@ const createBtn = (id, value) => {
 
 const getStorageArr = () => {
   return JSON.parse(localStorage.movieList);
-}
+};
 
 // add a movie
 const addMovie = (title, releaseDate, rating) => {
@@ -71,7 +84,7 @@ const addMovie = (title, releaseDate, rating) => {
   info.innerText = `${title}(${releaseDate}) - Rated:${rating}`;
   li.appendChild(info);
 
-  // attach the buttons 
+  // attach the buttons
   let editBtn = createBtn("editBtn", "✎Edit");
   let deleteBtn = createBtn("deleteBtn", "🗑Delete");
   editBtn.addEventListener("click", () => {
@@ -79,27 +92,25 @@ const addMovie = (title, releaseDate, rating) => {
     isEdit = true;
     editNum = editBtn.parentElement.getAttribute("data-position");
 
-    let storageArr = getStorageArr()
+    let storageArr = getStorageArr();
     const TITLE_POS = 0;
     const YEAR_POS = 1;
     const RATING_POS = 2;
 
     // when edit, previous values should be there
-    let currElem = storageArr[editNum]
-    title_elem.value = currElem[TITLE_POS];
+    let currElem = storageArr[editNum];
+    title_elem.value = currElem[TITLE_POS]; // hey you can just access attribute by elem.attribute = value
     releaseDate_elem.value = currElem[YEAR_POS];
     // make the optionElem select on what the user used to select
-    let optionElem = document.querySelector(`option[value=${currElem[RATING_POS]}]`);
+    let optionElem = document.querySelector(
+      `option[value=${currElem[RATING_POS]}]`
+    );
     optionElem.selected = true;
-
-
   });
 
-  deleteBtn.addEventListener("click", () => {
-    li.remove();
-    removeArr(li.getAttribute("data-position"));
-    updateIndex();
-    checkEmpty();
+  deleteBtn.addEventListener("click", e => {
+    currDeleteLi = e.srcElement.parentElement;
+    deleteDialog.open = true;
   });
 
   // add all the buttons and list
@@ -136,6 +147,8 @@ const addMovie = (title, releaseDate, rating) => {
     }
   }
 };
+
+// add event Listener for edit/add dialog
 addBtn.addEventListener("click", () => {
   dialog.open = true;
   setTimeout(() => checkEmpty(), 0);
@@ -170,8 +183,23 @@ cancelBtn.addEventListener("click", () => {
   });
 });
 
-// populate default array
+// add event listener for btns in deleteDialog
+const deleteBtn_DDia = document.querySelector("#deleteBtn_DDia"); // DDia -- Delete Dialog
+const deleteCancelBtn_DDia = document.querySelector("#cancelBtn_DDia");
 
+deleteBtn_DDia.addEventListener("click", () => {
+  deleteLi(currDeleteLi);
+
+  // reset
+  currDeleteLi = null;
+  deleteDialog.open = false;
+});
+
+deleteCancelBtn_DDia.addEventListener("click", () => {
+  deleteDialog.open = false;
+})
+
+// populate default array
 if (window.localStorage.getItem("movieList") === null) {
   storageList = [
     ["Once Upon a Time in America", 1984, "R"],
@@ -189,6 +217,3 @@ storageList.forEach(movieInfo => {
 });
 isFirst = false;
 checkEmpty();
-
-
-
