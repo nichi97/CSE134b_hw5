@@ -1,8 +1,11 @@
-const dialog = document.querySelector("dialog");
+const deleteDialog = document.querySelector("#deleteDialog");
 const ul = document.querySelector("ul");
 const addBtn = document.querySelector("#add_movie");
 const form = document.querySelector("form");
-const [title, releaseDate, rating, saveBtn, cancelBtn] = [...form];
+
+const dialog = document.querySelector("#editMovie");
+const [title_elem, releaseDate_elem, rating_elem, saveBtn, cancelBtn] = [...form];
+
 const para = document.createElement("p");
 let titleStr, dateStr, ratingStr;
 let isEdit = false;
@@ -10,6 +13,8 @@ let editNum;
 let isFirst = true;
 let leapFlag = true;
 
+// check if the local storage is empty. If so, display the string 
+// saying that there is nothing in the list
 const checkEmpty = () => {
   if (localStorage.movieList.length == 2) {
     para.innerText = "-- There is no movie in the list -- ";
@@ -19,6 +24,7 @@ const checkEmpty = () => {
   }
 };
 
+// after deletion, update the index
 const updateIndex = () => {
   if (ul.children !== null) {
     Array.from(ul.children).forEach((child, i) => {
@@ -27,6 +33,7 @@ const updateIndex = () => {
   }
 };
 
+// update the localStorage
 const updateArr = (title, releaseDate, rating, position) => {
   let storage = Array.from(
     JSON.parse(window.localStorage.getItem("movieList"))
@@ -35,6 +42,7 @@ const updateArr = (title, releaseDate, rating, position) => {
   window.localStorage.setItem("movieList", JSON.stringify(storage));
 };
 
+// remove an element from local Storage Arr, but does not modify local copy
 const removeArr = pos => {
   let storage = Array.from(
     JSON.parse(window.localStorage.getItem("movieList"))
@@ -52,25 +60,48 @@ const createBtn = (id, value) => {
   return btn;
 };
 
+const getStorageArr = () => {
+  return JSON.parse(localStorage.movieList);
+}
+
+// add a movie
 const addMovie = (title, releaseDate, rating) => {
   let li = document.createElement("li");
   let info = document.createElement("p");
   info.innerText = `${title}(${releaseDate}) - Rated:${rating}`;
   li.appendChild(info);
 
+  // attach the buttons 
   let editBtn = createBtn("editBtn", "✎Edit");
   let deleteBtn = createBtn("deleteBtn", "🗑Delete");
   editBtn.addEventListener("click", () => {
     dialog.open = true;
     isEdit = true;
     editNum = editBtn.parentElement.getAttribute("data-position");
+
+    let storageArr = getStorageArr()
+    const TITLE_POS = 0;
+    const YEAR_POS = 1;
+    const RATING_POS = 2;
+
+    // when edit, previous values should be there
+    let currElem = storageArr[editNum]
+    title_elem.value = currElem[TITLE_POS];
+    releaseDate_elem.value = currElem[YEAR_POS];
+    // make the optionElem select on what the user used to select
+    let optionElem = document.querySelector(`option[value=${currElem[RATING_POS]}]`);
+    optionElem.selected = true;
+
+
   });
+
   deleteBtn.addEventListener("click", () => {
     li.remove();
     removeArr(li.getAttribute("data-position"));
     updateIndex();
     checkEmpty();
   });
+
   // add all the buttons and list
   li.setAttribute("data-position", ul.childElementCount);
   li.appendChild(editBtn);
@@ -158,3 +189,6 @@ storageList.forEach(movieInfo => {
 });
 isFirst = false;
 checkEmpty();
+
+
+
