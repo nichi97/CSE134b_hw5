@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Sign Up</title>
+</head>
+
+<body>
+    <h1>Sign Up</h1>
+    <form>
+        <label>
+            Username:
+            <input id="username" name="username" required="true">
+        </label>
+        <br>
+
+        <label>
+            Email:
+            <input id="email" type="email" name="email" required="true">
+        </label>
+        <br>
+
+        <label>
+            Password:
+            <input id="password" type="password" name="password" required="true" >
+        </label>
+        <br>
+
+        <label>
+            Re-enter Password:
+            <input id="re_password" type="password" name="re_password" required="true">
+        </label>
+        <br>
+
+        <input type="submit" value="Sign Up" id="signUpBtn">
+
+    </form>
+    <p> Already have an account? <a href="login.html">Login</a></p>
+
+    <script>
+
+
+
+
+        /* ----------------------------------------------------------------
+                   Checking for valid input
+        ------------------------------------------------------------------*/
+
+        // check if the password and the re-enter is the same 
+        // if do not match, return false. Else, return true
+        const check_same_password = () => {
+            const password_el = document.querySelector("#password");
+            const re_password_el = document.querySelector("#re_password");
+            if(password_el.value != re_password_el.value){
+                alert("Passwords do not match. Check again.");
+                return false;
+
+            }
+            return true;
+
+        }
+
+
+        // check if input element is empty
+        // if any is empty, return false, else, return true
+        const check_empty = () => {
+            const username_el = document.querySelector("#username").value;
+            const email_el = document.querySelector("#email").value;
+            const password_el = document.querySelector("#password").value;
+            const re_password_el = document.querySelector('#re_password').value;
+
+            if(username_el === "" || email_el === "" || password_el === "" || re_password_el === ""){
+                alert("Some field is empty! Please type in all fields")
+                return false 
+            }
+            return true;
+        }
+
+
+
+
+        /* ----------------------------------------------------------------
+                   XHR related  
+        ------------------------------------------------------------------*/
+
+        // handle request after user has input data in form
+        const account_signUp = () => {
+
+            if( !check_empty() || !check_same_password()){
+                return;
+            }
+
+            const endPoint = "http://fa19server.appspot.com/api/Users";
+            const data = "?username=nichi97&email=chg043@ucsd.edu&password=123456";
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", endPoint, true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.onreadystatechange = function () {
+                if (this.readyState === xhr.DONE && this.status === 200) {
+                    console.log(xhr.response);
+                }
+            }
+
+            let payload = {
+                "username": document.getElementById("username").value,
+                "email": document.getElementById("email").value,
+                "password": document.getElementById("password").value,
+            };
+
+            console.log(JSON.stringify(payload));
+            xhr.send(JSON.stringify(payload));
+
+        }
+
+        // actually add the event listener
+        const signUpBtn = document.querySelector("#signUpBtn");
+        signUpBtn.addEventListener("click", account_signUp);
+
+    </script>
+
+</body>
+
+</html>
