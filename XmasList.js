@@ -200,7 +200,7 @@ deleteCancelBtn_DDia.addEventListener("click", () => {
 })
 
 // populate default array
-if (window.localStorage.getItem("movieList") === null) {
+if (window.localStorage.getItem("movieList").toString() === "[]") {
   storageList = [
     ["Once Upon a Time in America", 1984, "R"],
     ["The Truman Show", 1998, "PG"],

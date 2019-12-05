@@ -37,7 +37,7 @@
                     console.log(JSON.parse(xhr.response));
                     console.log("User Logging in!")
                     localStorage.setItem("ID_JSON", xhr.response);
-                    window.location.replace("./styledcrud.html");
+                    window.location.replace("./XmasList.html");
 
                 } else if (xhr.readyState == xhr.DONE && xhr.status == 401) {
                     console.log("Username or Password is invalid!");
