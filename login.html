@@ -19,10 +19,60 @@
         <input id="password" name="password" type="password" required>
 
         <br>
-        <input type="button" value="Login">
+        <input type="button" value="Login" id="loginBtn">
     </form>
 
     <p>Don't have an account? <a href="./signUp.html">Sign up</a></p>
+
+
+    <script>
+
+        const handleLogin = () => {
+            const xhr = new XMLHttpRequest();
+            const endPoint = "http://fa19server.appspot.com/api/Users/login";
+            xhr.open("POST", endPoint, true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+                    console.log(JSON.parse(xhr.response));
+                    console.log("User Logging in!")
+                    localStorage.setItem("ID_JSON", xhr.response);
+                    window.location.replace("./styledcrud.html");
+
+                } else if (xhr.readyState == xhr.DONE && xhr.status == 401) {
+                    console.log("Username or Password is invalid!");
+                    alert("Invalid password or username!")
+                    return;
+                }
+
+            }
+
+            // get payload from user input
+            let payload = null;
+            const username_el = document.querySelector('#username');
+            const password_el = document.querySelector('#password');
+            if (username_el.value.includes("@")) {
+                payload = {
+                    email: username_el.value,
+                    password: password_el.value,
+                }
+            } else {
+                payload = {
+                    username: username_el.value,
+                    password: password_el.value,
+                }
+            }
+
+            xhr.send(JSON.stringify(payload));
+        }
+
+        const loginBtn = document.querySelector('#loginBtn');
+        loginBtn.addEventListener("click", () => {
+            handleLogin();
+        })
+
+
+    </script>
 
 </body>
 

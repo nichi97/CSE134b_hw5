@@ -25,7 +25,7 @@
 
         <label>
             Password:
-            <input id="password" type="password" name="password" required="true" >
+            <input id="password" type="password" name="password" required="true">
         </label>
         <br>
 
@@ -35,7 +35,7 @@
         </label>
         <br>
 
-        <input type="submit" value="Sign Up" id="signUpBtn">
+        <input type="button" value="Sign Up" id="signUpBtn">
 
     </form>
     <p> Already have an account? <a href="login.html">Login</a></p>
@@ -54,7 +54,7 @@
         const check_same_password = () => {
             const password_el = document.querySelector("#password");
             const re_password_el = document.querySelector("#re_password");
-            if(password_el.value != re_password_el.value){
+            if (password_el.value != re_password_el.value) {
                 alert("Passwords do not match. Check again.");
                 return false;
 
@@ -72,9 +72,9 @@
             const password_el = document.querySelector("#password").value;
             const re_password_el = document.querySelector('#re_password').value;
 
-            if(username_el === "" || email_el === "" || password_el === "" || re_password_el === ""){
+            if (username_el === "" || email_el === "" || password_el === "" || re_password_el === "") {
                 alert("Some field is empty! Please type in all fields")
-                return false 
+                return false
             }
             return true;
         }
@@ -89,8 +89,9 @@
         // handle request after user has input data in form
         const account_signUp = () => {
 
-            if( !check_empty() || !check_same_password()){
-                return;
+            if (!check_empty() || !check_same_password()) {
+                //return;
+                console.log("in side of error")
             }
 
             const endPoint = "http://fa19server.appspot.com/api/Users";
@@ -101,6 +102,10 @@
             xhr.onreadystatechange = function () {
                 if (this.readyState === xhr.DONE && this.status === 200) {
                     console.log(xhr.response);
+                    window.location.replace("./login.html");
+
+                } else if (this.readyState === xhr.DONE && this.status === 422) {
+                    alert("This user already exists!")
                 }
             }
 
