@@ -31,13 +31,13 @@
             const xhr = new XMLHttpRequest();
             const endPoint = "http://fa19server.appspot.com/api/Users/login";
             xhr.open("POST", endPoint, true);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === xhr.DONE && xhr.status === 200) {
                     console.log(JSON.parse(xhr.response));
                     console.log("User Logging in!")
                     localStorage.setItem("ID_JSON", xhr.response);
-                    window.location.replace("./XmasList.html");
+                    window.location.replace("./XmasList2.html");
 
                 } else if (xhr.readyState == xhr.DONE && xhr.status == 401) {
                     console.log("Username or Password is invalid!");

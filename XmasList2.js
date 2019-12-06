@@ -75,6 +75,8 @@ const createLi = (item, price, category, image, comment) => {
   // still need to think about this one
   const image_el = document.createElement("img");
   image_el.src = image;
+  image_el.setAttribute("height", "200px");
+  image_el.setAttribute("width", "200px");
 
   const comment_el = document.createElement("p");
   comment_el.class = "comment";
@@ -93,6 +95,31 @@ const createLi = (item, price, category, image, comment) => {
   li_elem.appendChild(deleteBtn_el);
 
   return li_elem;
+};
+
+/*------------------------------------------------------
+            XHR remove methods
+-------------------------------------------------------*/
+
+/**
+ *
+ * Create a new
+ * @param {JSON} payload payload sent to database
+ */
+const remoteCreate = payload => {
+  const xhr = new XMLHttpRequest();
+  let endPoint = "http://fa19server.appspot.com/api/wishlists/myWishlist?access_token=";
+  const accessToken = JSON.parse(localStorage.ID_JSON).id;
+  endPoint = endPoint + accessToken;
+
+  xhr.open("POST", endPoint, true);
+  xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+      console.log(JSON.parse(xhr.response));
+    }
+  };
+  xhr.send(JSON.stringify(payload));
 };
 
 /* -----------------------------------------
@@ -154,7 +181,29 @@ function whichChild(child) {
 }
 
 /**
+ * This function upload an image to cloudinary and then return the url
+ * @param {*} file
+ * @return a url returned from Cloudinar service
+ */
+const uploadCloudinary = file => {
+  const xhr = new XMLHttpRequest();
+  const endPoint = "https://api.cloudinary.com/v1_1/dq4d7oo7k/image/upload";
+  xhr.open("post", endPoint);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+      let response = JSON.parse(xhr.responseText);
+      return response["secure_url"];
+    }
+  };
+  const payload = new FormData();
+  payload.append("upload_preset", "ml_default");
+  payload.append("file", file);
+  xhr.send(payload);
+};
+
+/**
  * Get info from createDialog, parse them, create an li, then append it to ul, also update localStorage
+ * But the image have to be loaded first, then other action ensue
  * @param {int} index where you want the new Li to be added ni the ul
  */
 const addGift = index => {
@@ -163,43 +212,92 @@ const addGift = index => {
   const category_el = document.querySelector("#category");
   const comment_el = document.querySelector("#comment");
   const image_el = document.querySelector("#image");
+  let image_url = null;
 
   // read the image and load it
   var file = image_el.files[0];
-  var reader = new FileReader();
-  reader.onloadend = function() {
-      // where BUG is
-    console.log("RESULT", reader.result);
+  //image_url = uploadCloudinary(file);
 
-    // append li in ul
-    const currLi = createLi(
-      item_el.value,
-      price_el.value,
-      category_el.value,
-      reader.result,
-      comment_el.value
-    );
+  // upload picture to
+  const xhr = new XMLHttpRequest();
+  const endPoint = "https://api.cloudinary.com/v1_1/dq4d7oo7k/image/upload";
+  xhr.open("post", endPoint);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+      let response = JSON.parse(xhr.responseText);
+      image_url = response.secure_url;
 
-    const gift = {
-      item: item_el.value,
-      price: price_el.value,
-      category: category_el.value,
-      image: reader.result,
-      comment: comment_el.value
-    };
+      // don't do anything before the image is loaded
+      console.log("url is " + image_url);
+      const currLi = createLi(
+        item_el.value,
+        price_el.value,
+        category_el.value,
+        image_url,
+        comment_el.value
+      );
 
-    // update localStorage
-    addStorageElem(index, gift);
+      const gift = {
+        item: item_el.value,
+        price: price_el.value,
+        category: category_el.value,
+        image: image_url,
+        comment: comment_el.value
+      };
 
-    // append depending on whether it is edit or normal addition
-    const ul_el = document.querySelector("ul");
-    if (index !== null) {
-      ul_el.children[index].replaceWith(currLi);
-      currEditIndex = null;
-    } else {
-      ul_el.append(currLi);
+      // update localStorage
+      addStorageElem(index, gift);
+
+      // append depending on whether it is edit or normal addition
+      const ul_el = document.querySelector("ul");
+      if (index !== null) {
+        ul_el.children[index].replaceWith(currLi);
+        currEditIndex = null;
+      } else {
+        ul_el.append(currLi);
+        remoteCreate(gift);
+      }
     }
   };
+  const payload = new FormData();
+  payload.append("upload_preset", "ml_default");
+  payload.append("file", file);
+  xhr.send(payload);
+
+  //   const payload = new FormData();
+  //   payload.append("upload_preset", "ml_default");
+  //   payload.append("file", file);
+  //   xhr.send(payload);
+
+  //   // don't do anything before the image is loaded
+  //   console.log("url is " + image_url);
+  //   const currLi = createLi(
+  //     item_el.value,
+  //     price_el.value,
+  //     category_el.value,
+  //     image_url,
+  //     comment_el.value
+  //   );
+
+  //   const gift = {
+  //     item: item_el.value,
+  //     price: price_el.value,
+  //     category: category_el.value,
+  //     image: image_url,
+  //     comment: comment_el.value
+  //   };
+
+  //   // update localStorage
+  //   addStorageElem(index, gift);
+
+  //   // append depending on whether it is edit or normal addition
+  //   const ul_el = document.querySelector("ul");
+  //   if (index !== null) {
+  //     ul_el.children[index].replaceWith(currLi);
+  //     currEditIndex = null;
+  //   } else {
+  //     ul_el.append(currLi);
+  //   }
 };
 
 /**
@@ -207,7 +305,7 @@ const addGift = index => {
  */
 const storage2Li = () => {};
 
-/* ---------------------------------------
+/* ------------------------------------------
                 Add EventListener
     ----------------------------------------*/
 
@@ -237,7 +335,7 @@ deleteOKBtn.addEventListener("click", () => {
   // TODO DEBUG set delete remove database
 
   currdeleteindex = null;
-  document.queryselector("#deleteDialog").open = false;
+  document.querySelector("#deleteDialog").open = false;
 });
 
 // event listenr of cancel button in delete
