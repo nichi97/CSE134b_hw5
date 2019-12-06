@@ -1,6 +1,6 @@
 // modified when edit and delete
-let currEditIndex = null;
-let currDeleteIndex = null;
+var currEditIndex = null;
+var currDeleteIndex = null;
 
 /* --------------------------------------------------
             Element Modification Functions
@@ -8,8 +8,9 @@ let currDeleteIndex = null;
 
 // parent -- parent element (li) of a edit button
 const createEditBtn = li => {
-  const editBtn_el = document.createElement("button");
+  const editBtn_el = document.createElement("input");
   editBtn_el.value = "Edit";
+  editBtn_el.type = "button";
   editBtn_el.addEventListener("click", () => {
     // keep track of which one we are editing here
     currEditIndex = whichChild(li);
@@ -28,6 +29,7 @@ const deleteLi = () => {
   const ul_el = document.querySelector("ul");
   // remove local storage
   ul_el.children[currDeleteIndex].remove();
+  // TODO remove remote
 };
 
 /**
@@ -37,13 +39,15 @@ const deleteLi = () => {
  * @return {HTMLElement} the delete button element
  */
 const createDeleteBtn = li => {
-  const deleteBtn_el = document.createElement("button");
+  const deleteBtn_el = document.createElement("input");
+  deleteBtn_el.type = "button";
   deleteBtn_el.value = "Delete";
   deleteBtn_el.addEventListener("click", () => {
     currDeleteIndex = whichChild(li);
+    const deleteDialog_el = document.querySelector("#deleteDialog");
+    deleteDialog_el.open = true;
   });
-  const deleteDialog_el = document.querySelector("#deleteDialog");
-  deleteDialog_el.open = true;
+  return deleteBtn_el;
 };
 
 // item -- string
@@ -77,6 +81,7 @@ const createLi = (item, price, category, image, comment) => {
   comment_el.innerHTML = comment;
 
   const editBtn_el = createEditBtn(li_elem);
+  const deleteBtn_el = createDeleteBtn(li_elem);
 
   // put everything inside of the list
   li_elem.appendChild(item_elem);
@@ -85,6 +90,7 @@ const createLi = (item, price, category, image, comment) => {
   li_elem.appendChild(image_el);
   li_elem.appendChild(comment_el);
   li_elem.appendChild(editBtn_el);
+  li_elem.appendChild(deleteBtn_el);
 
   return li_elem;
 };
@@ -96,30 +102,41 @@ const createLi = (item, price, category, image, comment) => {
 // citation -- https://stackoverflow.com/questions/6150289/how-to-convert-image-into-base64-string-using-javascript/20285053#20285053
 // it takes a file that is uploaded from local, and return the encoded image
 /**
- *
  * This function takes an encoded image and return a encoded base64 data url
  * @param {HTMLElement} element image element
  * @return image in encoded base64
  */
-function encodeImageFileAsURL(element) {
-  var file = element.files[0];
-  var reader = new FileReader();
-  reader.onloadend = function() {
-    console.log("RESULT", reader.result);
-    return reader.result;
-  };
-  reader.readAsDataURL(file);
-}
+function encodeImageFileAsURL(element) {}
 
 /**
  * This function remove an element in local storage at given index
  * @param {ind} index at which the local storage elem should be removed
- *
  */
 const removeStorageElem = index => {
   const giftList = JSON.parse(window.localStorage.getItem("giftList"));
   giftList.splice(index, 1);
-  localStorage.setItem("giftList", giftList);
+  localStorage.setItem("giftList", JSON.stringify(giftList));
+};
+
+/**
+ *
+ * @param {int} index where you want to add the elem
+ * @param {JSON} obj the object to be added
+ */
+const addStorageElem = (index, obj) => {
+  let giftList = JSON.parse(localStorage.getItem("giftList"));
+
+  // if index = null, initialize the array
+  if (giftList === null) {
+    giftList = [obj];
+  } else if (index === null) {
+    // if index is null, append
+    giftList.push(obj);
+  } else {
+    // else, modify it before we go
+    giftList[index] = obj;
+  }
+  localStorage.setItem("giftList", JSON.stringify(giftList));
 };
 
 // citation -- https://stackoverflow.com/a/5913984
@@ -133,34 +150,86 @@ function whichChild(child) {
   while ((child = child.previousSibling) != null) {
     i++;
   }
-  return i;
+  return i - 1;
 }
+
+/**
+ * Get info from createDialog, parse them, create an li, then append it to ul, also update localStorage
+ * @param {int} index where you want the new Li to be added ni the ul
+ */
+const addGift = index => {
+  const item_el = document.querySelector("#item");
+  const price_el = document.querySelector("#price");
+  const category_el = document.querySelector("#category");
+  const comment_el = document.querySelector("#comment");
+  const image_el = document.querySelector("#image");
+
+  // read the image and load it
+  var file = image_el.files[0];
+  var reader = new FileReader();
+  reader.onloadend = function() {
+      // where BUG is
+    console.log("RESULT", reader.result);
+
+    // append li in ul
+    const currLi = createLi(
+      item_el.value,
+      price_el.value,
+      category_el.value,
+      reader.result,
+      comment_el.value
+    );
+
+    const gift = {
+      item: item_el.value,
+      price: price_el.value,
+      category: category_el.value,
+      image: reader.result,
+      comment: comment_el.value
+    };
+
+    // update localStorage
+    addStorageElem(index, gift);
+
+    // append depending on whether it is edit or normal addition
+    const ul_el = document.querySelector("ul");
+    if (index !== null) {
+      ul_el.children[index].replaceWith(currLi);
+      currEditIndex = null;
+    } else {
+      ul_el.append(currLi);
+    }
+  };
+};
+
+/**
+ * convert localStorage to li
+ */
+const storage2Li = () => {};
 
 /* ---------------------------------------
                 Add EventListener
     ----------------------------------------*/
+
+// set the confirm button in create dialog
 const createConfirm_el = document.querySelector("#editConfirm");
 createConfirm_el.addEventListener("click", () => {
-  const item_el = document.querySelector("#item");
-  const price_el = document.querySelector("#price");
-  const category_el = document.querySelector("#category");
-  const image_el = document.querySelector("#image");
-  const comment = document.querySelector("#comment");
+  // added to HTML
+  addGift(currEditIndex);
 
-  const currLi = createLi(
-    item_el.innertext,
-    price_el.innertext,
-    category_el.innertext,
-    encodeImageFileasURL(image_el),
-    comment_el.innertext
-  );
-  const ul_el = document.querySelector("ul");
-  ul_el.children[currEditIndex] = currLi;
-  // TODO haven't done yet
+  // added to local storage
+  document.querySelector("#createDialog").open = false;
+});
+
+// set the cancel button in create dialog
+const createCancel_el = document.querySelector("#editCancel");
+createCancel_el.addEventListener("click", () => {
+  document.querySelector("#createDialog").open = false;
+  currEditIndex = null;
 });
 
 // event listener in the delete button in delete dialog
-const deleteOKBtn = document.querySelector("deleteOK");
+const deleteOKBtn = document.querySelector("#deleteOK");
 deleteOKBtn.addEventListener("click", () => {
   deleteLi();
   removeStorageElem(currDeleteIndex);
@@ -168,13 +237,18 @@ deleteOKBtn.addEventListener("click", () => {
   // TODO DEBUG set delete remove database
 
   currdeleteindex = null;
-  document.queryselector("#deletedialog").open = false;
+  document.queryselector("#deleteDialog").open = false;
 });
 
 // event listenr of cancel button in delete
 const deleteCancelBtn = document.querySelector("#deleteCancel");
 deleteCancelBtn.addEventListener("click", () => {
   currdeleteindex = null;
-  document.queryselector("#deletedialog").open = false;
+  document.querySelector("#deleteDialog").open = false;
 });
 
+// event listener for addBtn
+const addBtn = document.querySelector("#addBtn");
+addBtn.addEventListener("click", () => {
+  document.querySelector("#createDialog").open = true;
+});
