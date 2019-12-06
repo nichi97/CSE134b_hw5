@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Xmas List</title>
+</head>
+
+<body>
+    <dialog id="createDialog">
+        <form>
+            <label>
+                Item:
+                <input id="item" name="item">
+            </label>
+            <br>
+
+            <label>
+                Price:
+                <input id="price" name="price">
+            </label>
+            <br>
+
+            <label>
+                Category:
+                <input id="category" name="category">
+            </label>
+            <br>
+
+            <label>
+                Image:
+                <input id="image" name="image" type="file" accept=".jpg, .svg, .jpeg, .pgn, .gif, .tiff">
+            </label>
+            <br>
+
+            <label>
+                Comment:
+                <input id="comment" name="comment">
+            </label>
+
+            <input type="button" value="Confirm" id="editConfirm" >
+            <input type="button" value="Cancel" id="editCancel">
+        </form>
+    </dialog>
+
+    <dialog id="deleteDialog">
+        <p> Do you want to delete this?</p>
+        <input type="button" value="Delete" id="deleteOK">
+        <input type="button" value="Cancel" id="deleteCancel">
+    </dialog>
+
+
+    <h1>🎄🎅Xmas List!!!🎅🎄</h1>
+    <ul>
+    </ul>
+
+</body>
+
+<script>
+
+    // modified when edit and delete
+    let currEditIndex = null;
+    let currDeleteIndex = null;
+
+
+/* --------------------------------------------------
+            Element Creation functions
+----------------------------------------------------*/
+
+    // parent -- parent element (li) of a edit button
+    const createEditBtn = (li) => {
+        const editBtn_el = document.createElement('button');
+        editBtn_el.value="Edit";
+        editBtn_el.addEventListener("click", () => {
+
+            // keep track of which one we are editing here
+            currEditIndex = whichChild(li);
+
+            const dialog_el = document.querySelector('#createDialog');
+            //upon click, open the dialog box
+            dialog_el.open = true;
+        })
+    }
+
+
+    // item -- string
+    // price -- string 
+    // category -- string 
+    // image -- image in encoded 64 base
+    // comment -- comment that user want to add
+    const createLi = (item, price, category, image, comment) => {
+
+        const li_elem = document.createElement('li');
+
+        const item_elem = document.createElement('p');
+        item_elem.class = "item";
+        item_elem.innerHTML = item;
+
+        const price_el = document.createElement('p');
+        price_el.class = "price";
+        price_el.innerHTML = price;
+
+        const category_el = document.createElement('p');
+        category_el.class = "category";
+        category_el.innerHTML = category;
+
+        // still need to think about this one
+        const image_el = document.createElement('img');
+
+        const comment_el = document.createElement('p');
+        comment_el.class = "comment";
+        comment_el.innerHTML = comment;
+    }
+
+    /* -----------------------------------------
+                Helper method
+    --------------------------------------------*/
+
+    // citation -- https://stackoverflow.com/questions/6150289/how-to-convert-image-into-base64-string-using-javascript/20285053#20285053
+    // it takes a file that is uploaded from local, and return the encoded image 
+    function encodeImageFileAsURL(element) {
+        var file = element.files[0];
+        var reader = new FileReader();
+        reader.onloadend = function () {
+            console.log('RESULT', reader.result)
+            return reader.result;
+        }
+        reader.readAsDataURL(file);
+    }
+
+
+    // citation -- https://stackoverflow.com/a/5913984
+    function whichChild(child){
+        let i = 0;
+        while((child = child.previousSibling) != null ){
+            i++;
+        }
+        return i;
+    }
+
+
+    /* ---------------------------------------
+                Add EventListener
+    ----------------------------------------*/
+    const createConfirm_el = document.querySelector('#editConfirm');
+    createConfirm_el.addEventListener
+    
+</script>
+
+</html>
