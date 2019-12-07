@@ -1,6 +1,7 @@
 // modified when edit and delete
 var currEditIndex = null;
 var currDeleteIndex = null;
+var accessToken = JSON.parse(localStorage.ID_JSON).id;
 
 /* --------------------------------------------------
             Element Modification Functions
@@ -28,7 +29,10 @@ const createEditBtn = li => {
 const deleteLi = () => {
   const ul_el = document.querySelector("ul");
   // remove local storage
-  ul_el.children[currDeleteIndex].remove();
+  let currChild = ul_el.children[currDeleteIndex];
+  let remoteId = currChild.getAttribute("data-remoteId");
+  currChild.remove();
+  remoteDeleteItemById(remoteId);
   // TODO remove remote
 };
 
@@ -100,26 +104,136 @@ const createLi = (item, price, category, image, comment) => {
 /*------------------------------------------------------
             XHR remove methods
 -------------------------------------------------------*/
+/**
+ * get all elements in the wishList of the current user
+ * This has some problem with call backs and all. Watch out for that
+ * @returns the wishItems
+ */
+const remoteGetAll = listObj => {
+  var data = null;
+
+  var xhr = new XMLHttpRequest();
+  xhr.withCredentials = true;
+
+  xhr.addEventListener("readystatechange", function() {
+    if (this.readyState === 4) {
+      console.log(this.responseText);
+      listObj = JSON.parse(this.responseText);
+    }
+  });
+
+  xhr.open(
+    "GET",
+    `http://fa19server.appspot.com/api/wishlists/myWishlist?access_token=${accessToken}`,
+    true
+  );
+  xhr.setRequestHeader("Accept", "*/*");
+  xhr.setRequestHeader("cache-control", "no-cache");
+
+  xhr.send(data);
+};
 
 /**
  *
- * Create a new
- * @param {JSON} payload payload sent to database
+ * @param {JSON} payload the payload that want to add to database
  */
-const remoteCreate = payload => {
-  const xhr = new XMLHttpRequest();
-  let endPoint = "http://fa19server.appspot.com/api/wishlists/myWishlist?access_token=";
-  const accessToken = JSON.parse(localStorage.ID_JSON).id;
-  endPoint = endPoint + accessToken;
+const remoteAdd = payload => {
+  let data = `item=${payload.item}&price=${payload.price}&category=${payload.categoty}&image=${payload.image}&comment=${payload.comment}`;
 
-  xhr.open("POST", endPoint, true);
-  xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
-      console.log(JSON.parse(xhr.response));
+  let xhr = new XMLHttpRequest();
+  xhr.withCredentials = true;
+
+  xhr.addEventListener("readystatechange", function() {
+    if (this.readyState === 4) {
+      console.log(this.responseText);
     }
-  };
-  xhr.send(JSON.stringify(payload));
+  });
+
+  xhr.open(
+    "POST",
+    "http://fa19server.appspot.com/api/wishlists?access_token=v7DYO9Ll3HXVCkMZ8M4dUzIc8SUBgkhDGPlyNLXaB6cWtWWY3CztTzVsoLbBNXT6"
+  );
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  xhr.send(data);
+};
+
+/**
+ * This method print the remoteElement you want to get by id
+ * @param {String} remoteId Element that you want to get
+ */
+const remoteGetItemById = remoteId => {
+  var data = null;
+
+  var xhr = new XMLHttpRequest();
+  xhr.withCredentials = true;
+
+  xhr.addEventListener("readystatechange", function() {
+    if (this.readyState === 4) {
+      console.log(this.responseText);
+    }
+  });
+
+  xhr.open(
+    "GET",
+    `http://fa19server.appspot.com/api/wishlists/${remoteId}?access_token=${accessToken}`
+  );
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xhr.setRequestHeader("Cache-Control", "no-cache");
+
+  xhr.send(data);
+};
+
+/**
+ * Delete the item by id
+ * @param {string} remoteId
+ */
+const remoteDeleteItemById = remoteId => {
+  var data = null;
+
+  var xhr = new XMLHttpRequest();
+  xhr.withCredentials = true;
+
+  xhr.addEventListener("readystatechange", function() {
+    if (this.readyState === 4) {
+      console.log(this.responseText);
+    }
+  });
+
+  xhr.open(
+    "DELETE",
+    `http://fa19server.appspot.com/api/wishlists/${remoteId}?access_token=${accessToken}`
+  );
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xhr.setRequestHeader("Cache-Control", "no-cache");
+
+  xhr.send(data);
+};
+
+/**
+ * Update the item by id
+ * @param {string} remoteId
+ */
+const remoteUpdateItemById = (remoteId, payload) => {
+  let data = `item=${payload.item}&price=${payload.price}&category=${payload.category}&image=${payload.image}&comment=${payload.comment}`;
+
+  let xhr = new XMLHttpRequest();
+  xhr.withCredentials = true;
+
+  xhr.addEventListener("readystatechange", function() {
+    if (this.readyState === 4) {
+      console.log(this.responseText);
+    }
+  });
+
+  xhr.open(
+    "POST",
+    `http://fa19server.appspot.com/api/wishlists/${remoteId}/replace?access_token=${accessToken}`
+  );
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xhr.setRequestHeader("Cache-Control", "no-cache");
+
+  xhr.send(data);
 };
 
 /* -----------------------------------------
@@ -214,13 +328,14 @@ const addGift = index => {
   const image_el = document.querySelector("#image");
   let image_url = null;
 
+
   // read the image and load it
   var file = image_el.files[0];
   //image_url = uploadCloudinary(file);
 
-  // upload picture to
-  const xhr = new XMLHttpRequest();
-  const endPoint = "https://api.cloudinary.com/v1_1/dq4d7oo7k/image/upload";
+  // upload picture and get URL
+  let xhr = new XMLHttpRequest();
+  let endPoint = "https://api.cloudinary.com/v1_1/dq4d7oo7k/image/upload";
   xhr.open("post", endPoint);
   xhr.onreadystatechange = function() {
     if (xhr.readyState === xhr.DONE && xhr.status === 200) {
@@ -228,7 +343,6 @@ const addGift = index => {
       image_url = response.secure_url;
 
       // don't do anything before the image is loaded
-      console.log("url is " + image_url);
       const currLi = createLi(
         item_el.value,
         price_el.value,
@@ -251,53 +365,73 @@ const addGift = index => {
       // append depending on whether it is edit or normal addition
       const ul_el = document.querySelector("ul");
       if (index !== null) {
-        ul_el.children[index].replaceWith(currLi);
+        // edit current element
+        let oldChild = ul_el.children[index];
+        let remoteId = oldChild.getAttribute("data-remoteId");
+
+        // remoteUpdateItemById(remoteId, payload)
+        let elem_payload = gift;
+        let data = `item=${elem_payload.item}&price=${elem_payload.price}&category=${elem_payload.category}&image=${elem_payload.image}&comment=${elem_payload.comment}`;
+
+        let xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function() {
+          if (this.readyState === 4) {
+            console.log(this.responseText);
+          }
+        });
+
+        xhr.open(
+          "POST",
+          `http://fa19server.appspot.com/api/wishlists/${remoteId}/replace?access_token=${accessToken}`
+        );
+        xhr.setRequestHeader(
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        );
+        xhr.setRequestHeader("Cache-Control", "no-cache");
+        xhr.send(data);
+
+        // update Li
+        currLi.setAttribute("data-remoteId", remoteId);
+        oldChild.replaceWith(currLi);
         currEditIndex = null;
       } else {
-        ul_el.append(currLi);
-        remoteCreate(gift);
+        ul_el.appendChild(currLi);
+        let elem_payload = gift;
+        // add new element to database
+        let data = `item=${elem_payload.item}&price=${elem_payload.price}&category=${elem_payload.category}&image=${elem_payload.image}&comment=${elem_payload.comment}`;
+
+        let xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function() {
+          if (this.readyState === 4) {
+            console.log(this.responseText);
+            let remoteId = JSON.parse(this.responseText).id;
+            currLi.setAttribute("data-remoteId", remoteId);
+          }
+        });
+
+        xhr.open(
+          "POST",
+          "http://fa19server.appspot.com/api/wishlists?access_token=v7DYO9Ll3HXVCkMZ8M4dUzIc8SUBgkhDGPlyNLXaB6cWtWWY3CztTzVsoLbBNXT6"
+        );
+        xhr.setRequestHeader(
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        );
+
+        xhr.send(data);
       }
     }
   };
-  const payload = new FormData();
+  // send the image data
+  let payload = new FormData();
   payload.append("upload_preset", "ml_default");
   payload.append("file", file);
   xhr.send(payload);
-
-  //   const payload = new FormData();
-  //   payload.append("upload_preset", "ml_default");
-  //   payload.append("file", file);
-  //   xhr.send(payload);
-
-  //   // don't do anything before the image is loaded
-  //   console.log("url is " + image_url);
-  //   const currLi = createLi(
-  //     item_el.value,
-  //     price_el.value,
-  //     category_el.value,
-  //     image_url,
-  //     comment_el.value
-  //   );
-
-  //   const gift = {
-  //     item: item_el.value,
-  //     price: price_el.value,
-  //     category: category_el.value,
-  //     image: image_url,
-  //     comment: comment_el.value
-  //   };
-
-  //   // update localStorage
-  //   addStorageElem(index, gift);
-
-  //   // append depending on whether it is edit or normal addition
-  //   const ul_el = document.querySelector("ul");
-  //   if (index !== null) {
-  //     ul_el.children[index].replaceWith(currLi);
-  //     currEditIndex = null;
-  //   } else {
-  //     ul_el.append(currLi);
-  //   }
 };
 
 /**
@@ -334,14 +468,14 @@ deleteOKBtn.addEventListener("click", () => {
 
   // TODO DEBUG set delete remove database
 
-  currdeleteindex = null;
+  currDeleteindex = null;
   document.querySelector("#deleteDialog").open = false;
 });
 
 // event listenr of cancel button in delete
 const deleteCancelBtn = document.querySelector("#deleteCancel");
 deleteCancelBtn.addEventListener("click", () => {
-  currdeleteindex = null;
+  currDeleteindex = null;
   document.querySelector("#deleteDialog").open = false;
 });
 
