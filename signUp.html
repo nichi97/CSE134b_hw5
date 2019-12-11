@@ -92,10 +92,10 @@
             if (!check_empty() || !check_same_password()) {
                 //return;
                 console.log("in side of error")
+                return;
             }
 
             const endPoint = "http://fa19server.appspot.com/api/Users";
-            const data = "?username=nichi97&email=chg043@ucsd.edu&password=123456";
             let xhr = new XMLHttpRequest();
             xhr.open("POST", endPoint, true);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");

@@ -61,8 +61,21 @@ const createDeleteBtn = li => {
 // comment -- comment that user want to add
 
 // return the li element that has been created
-const createLi = (item, price, category, image, comment) => {
+const createLi = li => {
+  let item = li.item;
+  let price = li.price;
+  let category = li.category;
+  let image = li.image;
+  let comment = li.comment;
+  let remoteId;
+
   const li_elem = document.createElement("li");
+
+  // set up their initial Id
+  if (li.id !== null) {
+    remoteId = li.id;
+    li_elem.setAttribute("data-remoteid", remoteId);
+  }
 
   const item_elem = document.createElement("p");
   item_elem.class = "item";
@@ -109,28 +122,32 @@ const createLi = (item, price, category, image, comment) => {
  * This has some problem with call backs and all. Watch out for that
  * @returns the wishItems
  */
-const remoteGetAll = listObj => {
-  var data = null;
+const remoteGetAll = () => {
+  return new Promise((resolve, reject) => {
+    var data = null;
+    let listObj;
 
-  var xhr = new XMLHttpRequest();
-  xhr.withCredentials = true;
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
 
-  xhr.addEventListener("readystatechange", function() {
-    if (this.readyState === 4) {
-      console.log(this.responseText);
-      listObj = JSON.parse(this.responseText);
-    }
+    xhr.addEventListener("readystatechange", function() {
+      if (this.readyState === 4) {
+        console.log(this.responseText);
+        listObj = JSON.parse(this.responseText);
+        resolve(listObj);
+      }
+    });
+
+    xhr.open(
+      "GET",
+      `http://fa19server.appspot.com/api/wishlists/myWishlist?access_token=${accessToken}`,
+      true
+    );
+    xhr.setRequestHeader("Accept", "*/*");
+    xhr.setRequestHeader("cache-control", "no-cache");
+
+    xhr.send(data);
   });
-
-  xhr.open(
-    "GET",
-    `http://fa19server.appspot.com/api/wishlists/myWishlist?access_token=${accessToken}`,
-    true
-  );
-  xhr.setRequestHeader("Accept", "*/*");
-  xhr.setRequestHeader("cache-control", "no-cache");
-
-  xhr.send(data);
 };
 
 /**
@@ -211,6 +228,17 @@ const remoteDeleteItemById = remoteId => {
 };
 
 /**
+ * Delete all the element in remote database
+ */
+async function remoteDeleteAll() {
+  let giftList = await remoteGetAll();
+  giftList = giftList.wishItems;
+  giftList.map(li => {
+    remoteDeleteItemById(li.id);
+  });
+}
+
+/**
  * Update the item by id
  * @param {string} remoteId
  */
@@ -269,6 +297,23 @@ const remoteLogout = () => {
  * @return image in encoded base64
  */
 function encodeImageFileAsURL(element) {}
+
+/**
+ * Get all data from remote database, then recreate the page
+ */
+async function initializePage() {
+  let giftList = await remoteGetAll();
+  let liList = Array(0);
+
+  // get all the li elements
+  giftList.wishItems.map((li, i) => (liList[i] = createLi(li)));
+
+  let ul_el = document.querySelector("ul");
+  liList.map(li => {
+    ul_el.appendChild(li);
+  });
+  console.log(liList);
+}
 
 /**
  * logout user from local storage
@@ -356,14 +401,6 @@ const addGift = index => {
   const image_el = document.querySelector("#image");
   let image_url = "./tenor.gif";
 
-  const currLi = createLi(
-    item_el.value,
-    price_el.value,
-    category_el.value,
-    image_url,
-    comment_el.value
-  );
-
   const gift = {
     item: item_el.value,
     price: price_el.value,
@@ -371,6 +408,8 @@ const addGift = index => {
     image: image_url,
     comment: comment_el.value
   };
+
+  const currLi = createLi(gift);
 
   const ul_el = document.querySelector("ul");
   // display first
@@ -408,6 +447,7 @@ const addGift = index => {
         // update the image here
         const img_target = ul_el.children[index].querySelector("img");
         img_target.src = image_url;
+        gift.image = image_url;
 
         // edit current element
         let oldChild = ul_el.children[index];
@@ -442,6 +482,7 @@ const addGift = index => {
       } else {
         const img_target = ul_el.lastChild.querySelector("img");
         img_target.src = image_url;
+        gift.image = image_url;
 
         ul_el.appendChild(currLi);
         let elem_payload = gift;
@@ -461,7 +502,7 @@ const addGift = index => {
 
         xhr.open(
           "POST",
-          "http://fa19server.appspot.com/api/wishlists?access_token=v7DYO9Ll3HXVCkMZ8M4dUzIc8SUBgkhDGPlyNLXaB6cWtWWY3CztTzVsoLbBNXT6"
+          `http://fa19server.appspot.com/api/wishlists?access_token=${accessToken}`
         );
         xhr.setRequestHeader(
           "Content-Type",
@@ -530,8 +571,15 @@ addBtn.addEventListener("click", () => {
   document.querySelector("#createDialog").open = true;
 });
 
+// event listener for logout button
 const logoutBtn = document.querySelector("#logoutBtn");
 logoutBtn.addEventListener("click", () => {
   remoteLogout();
   localLogout();
+  window.location.replace("./login.html")
+});
+
+// initialize the page when page is loaded
+window.addEventListener("load", () => {
+  initializePage();
 });
