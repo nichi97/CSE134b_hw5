@@ -102,7 +102,7 @@ const createLi = (item, price, category, image, comment) => {
 };
 
 /*------------------------------------------------------
-            XHR remove methods
+            XHR remote methods
 -------------------------------------------------------*/
 /**
  * get all elements in the wishList of the current user
@@ -236,6 +236,27 @@ const remoteUpdateItemById = (remoteId, payload) => {
   xhr.send(data);
 };
 
+/**
+ * logout the current user
+ */
+const remoteLogout = () => {
+  let xhr = new XMLHttpRequest();
+  let data = null;
+  xhr.open(
+    "POST",
+    `http://fa19server.appspot.com/api/Users/logout?${accessToken}`,
+    true
+  );
+
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+      console.log(`User ${accessToken} is logged out`);
+    }
+  };
+
+  xhr.send(data);
+};
+
 /* -----------------------------------------
                 Helper method
     --------------------------------------------*/
@@ -248,6 +269,13 @@ const remoteUpdateItemById = (remoteId, payload) => {
  * @return image in encoded base64
  */
 function encodeImageFileAsURL(element) {}
+
+/**
+ * logout user from local storage
+ */
+const localLogout = () => {
+  localStorage.clear();
+};
 
 /**
  * This function remove an element in local storage at given index
@@ -326,12 +354,42 @@ const addGift = index => {
   const category_el = document.querySelector("#category");
   const comment_el = document.querySelector("#comment");
   const image_el = document.querySelector("#image");
-  let image_url = null;
+  let image_url = "./tenor.gif";
 
+  const currLi = createLi(
+    item_el.value,
+    price_el.value,
+    category_el.value,
+    image_url,
+    comment_el.value
+  );
 
-  // read the image and load it
+  const gift = {
+    item: item_el.value,
+    price: price_el.value,
+    category: category_el.value,
+    image: image_url,
+    comment: comment_el.value
+  };
+
+  const ul_el = document.querySelector("ul");
+  // display first
+  if (index !== null) {
+    // edit current element
+    let oldChild = ul_el.children[index];
+    let remoteId = oldChild.getAttribute("data-remoteId");
+
+    // update Li
+    currLi.setAttribute("data-remoteId", remoteId);
+    oldChild.replaceWith(currLi);
+    currEditIndex = null;
+  } else {
+    ul_el.appendChild(currLi);
+    let elem_payload = gift;
+  }
+
+  // Then take care about the image
   var file = image_el.files[0];
-  //image_url = uploadCloudinary(file);
 
   // upload picture and get URL
   let xhr = new XMLHttpRequest();
@@ -342,29 +400,15 @@ const addGift = index => {
       let response = JSON.parse(xhr.responseText);
       image_url = response.secure_url;
 
-      // don't do anything before the image is loaded
-      const currLi = createLi(
-        item_el.value,
-        price_el.value,
-        category_el.value,
-        image_url,
-        comment_el.value
-      );
-
-      const gift = {
-        item: item_el.value,
-        price: price_el.value,
-        category: category_el.value,
-        image: image_url,
-        comment: comment_el.value
-      };
-
       // update localStorage
       addStorageElem(index, gift);
 
       // append depending on whether it is edit or normal addition
-      const ul_el = document.querySelector("ul");
       if (index !== null) {
+        // update the image here
+        const img_target = ul_el.children[index].querySelector("img");
+        img_target.src = image_url;
+
         // edit current element
         let oldChild = ul_el.children[index];
         let remoteId = oldChild.getAttribute("data-remoteId");
@@ -394,10 +438,11 @@ const addGift = index => {
         xhr.send(data);
 
         // update Li
-        currLi.setAttribute("data-remoteId", remoteId);
-        oldChild.replaceWith(currLi);
         currEditIndex = null;
       } else {
+        const img_target = ul_el.lastChild.querySelector("img");
+        img_target.src = image_url;
+
         ul_el.appendChild(currLi);
         let elem_payload = gift;
         // add new element to database
@@ -483,4 +528,10 @@ deleteCancelBtn.addEventListener("click", () => {
 const addBtn = document.querySelector("#addBtn");
 addBtn.addEventListener("click", () => {
   document.querySelector("#createDialog").open = true;
+});
+
+const logoutBtn = document.querySelector("#logoutBtn");
+logoutBtn.addEventListener("click", () => {
+  remoteLogout();
+  localLogout();
 });
