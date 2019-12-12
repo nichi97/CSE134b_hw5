@@ -10,7 +10,7 @@ var accessToken = JSON.parse(localStorage.ID_JSON).id;
 // parent -- parent element (li) of a edit button
 const createEditBtn = li => {
   const editBtn_el = document.createElement("input");
-  editBtn_el.value = "Edit";
+  editBtn_el.value = "✏️ Edit";
   editBtn_el.type = "button";
   editBtn_el.addEventListener("click", () => {
     // keep track of which one we are editing here
@@ -45,7 +45,7 @@ const deleteLi = () => {
 const createDeleteBtn = li => {
   const deleteBtn_el = document.createElement("input");
   deleteBtn_el.type = "button";
-  deleteBtn_el.value = "Delete";
+  deleteBtn_el.value = "🗑️ Delete";
   deleteBtn_el.addEventListener("click", () => {
     currDeleteIndex = whichChild(li);
     const deleteDialog_el = document.querySelector("#deleteDialog");
@@ -76,37 +76,38 @@ const createLi = li => {
     remoteId = li.id;
     li_elem.setAttribute("data-remoteid", remoteId);
   }
+  const image_el = document.createElement("img");
+  image_el.src = image;
+  image_el.setAttribute("height", "300px");
+  image_el.setAttribute("width", "300px");
 
   const item_elem = document.createElement("p");
   item_elem.class = "item";
-  item_elem.innerHTML = item;
+  item_elem.innerHTML = `Item: ${item}`;
 
   const price_el = document.createElement("p");
   price_el.class = "price";
-  price_el.innerHTML = price;
+  price_el.innerHTML = `Price: ${price}`;
 
   const category_el = document.createElement("p");
   category_el.class = "category";
-  category_el.innerHTML = category;
+  category_el.innerHTML = `Category: ${category}`;
 
   // still need to think about this one
-  const image_el = document.createElement("img");
-  image_el.src = image;
-  image_el.setAttribute("height", "200px");
-  image_el.setAttribute("width", "200px");
 
   const comment_el = document.createElement("p");
   comment_el.class = "comment";
-  comment_el.innerHTML = comment;
+  comment_el.innerHTML = `Comment: ${comment}`;
 
   const editBtn_el = createEditBtn(li_elem);
   const deleteBtn_el = createDeleteBtn(li_elem);
 
   // put everything inside of the list
+
+  li_elem.appendChild(image_el);
   li_elem.appendChild(item_elem);
   li_elem.appendChild(price_el);
   li_elem.appendChild(category_el);
-  li_elem.appendChild(image_el);
   li_elem.appendChild(comment_el);
   li_elem.appendChild(editBtn_el);
   li_elem.appendChild(deleteBtn_el);
@@ -302,6 +303,7 @@ function encodeImageFileAsURL(element) {}
  * Get all data from remote database, then recreate the page
  */
 async function initializePage() {
+  // change the H1
   let giftList = await remoteGetAll();
   let liList = Array(0);
 
@@ -576,7 +578,7 @@ const logoutBtn = document.querySelector("#logoutBtn");
 logoutBtn.addEventListener("click", () => {
   remoteLogout();
   localLogout();
-  window.location.replace("./login.html")
+  window.location.replace("./login.html");
 });
 
 // initialize the page when page is loaded

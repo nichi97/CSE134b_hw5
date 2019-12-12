@@ -1,0 +1,32 @@
+h1{
+    text-align:center;
+}
+
+#body_container{
+    position:absolute;
+    top: calc(35% - 253px/2);
+    left:calc(50% - 314px/2);
+    padding:30px 60px;
+    border-radius: 20px;
+
+    background-color:white;
+    background-color:rgba(235, 249, 242,0.5);
+}
+
+label{
+    line-height:3;
+}
+
+input[type="text"], input[type="password"]{
+    height:10px;
+    padding:10px 5px;
+    line-height:28px;
+}
+
+body{
+    background-image:url(art-blurred-blurry-bokeh-383646.jpg);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: cover;
+
+}

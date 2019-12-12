@@ -1,0 +1,72 @@
+#mainContainer {
+  left: 50%;
+}
+
+img {
+  float: right;
+  transform: rotate(10deg);
+  margin: 0 200px 0 0;
+  border-radius: 30px;
+}
+
+ul {
+  list-style: none;
+}
+
+li {
+  height: 350px;
+  margin-left: 100px;
+}
+
+input[type="button"] {
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  text-align: center;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  cursor: pointer;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+/*
+Citation: https://www.freecodecamp.org/news/a-quick-guide-to-styling-buttons-using-css-f64d4f96337f/
+borrowed button style
+*/
+input[type="button"]:hover{
+  background-color: #008cba;
+  color: white;
+}
+
+#mainContainer{
+  font-family: "Indie Flower", cursive;
+  font-weight: 800;
+  font-size: 25px;
+}
+
+body{
+    background-image:url("line_background.png");
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: cover;
+}
+
+h1 {
+  margin: 20px auto 40px;
+  text-align: center;
+}
+
+dialog{
+    position:sticky;
+    top:30%;
+}
+
+#headerBtn{
+    margin-left:calc(50% - 250px/2);
+    margin-bottom:150px;
+
+}

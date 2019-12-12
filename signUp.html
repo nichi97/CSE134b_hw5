@@ -5,40 +5,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="./signUp.css">
     <title>Sign Up</title>
 </head>
 
 <body>
-    <h1>Sign Up</h1>
-    <form>
-        <label>
-            Username:
-            <input id="username" name="username" required="true">
-        </label>
-        <br>
+    <div id="body_container">
+        <h1>Sign Up</h1>
+        <form>
+            <label>
+                Username:
+                <input id="username" name="username" type="text" required="true">
+            </label>
+            <br>
 
-        <label>
-            Email:
-            <input id="email" type="email" name="email" required="true">
-        </label>
-        <br>
+            <label>
+                Email:
+                <input id="email" type="email" name="email" required="true">
+            </label>
+            <br>
 
-        <label>
-            Password:
-            <input id="password" type="password" name="password" required="true">
-        </label>
-        <br>
+            <label>
+                Password:
+                <input id="password" type="password" name="password" required="true">
+            </label>
+            <br>
 
-        <label>
-            Re-enter Password:
-            <input id="re_password" type="password" name="re_password" required="true">
-        </label>
-        <br>
+            <label>
+                Re-enter Password:
+                <input id="re_password" type="password" name="re_password" required="true">
+            </label>
+            <br>
 
-        <input type="button" value="Sign Up" id="signUpBtn">
+            <input type="button" value="Sign Up" id="signUpBtn">
 
-    </form>
-    <p> Already have an account? <a href="login.html">Login</a></p>
+        </form>
+        <p> Already have an account? <a href="login.html">Login</a></p>
+
+    </div>
 
     <script>
 

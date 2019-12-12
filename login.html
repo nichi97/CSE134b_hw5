@@ -5,25 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link type="text/css" rel="stylesheet" href="./login.css">
     <title>Login</title>
 </head>
 
 <body>
-    <h1>Login</h1>
-    <form>
-        <label for="username">Username:</label>
-        <input id="username" name="username" required>
-        <br>
+    <div id="body_container">
+        <h1>Login</h1>
+        <form>
+            <label for="username">Username: &nbsp</label>
+            <input id="username" name="username" type="text" required>
+            <br>
 
-        <labeL for="password">Password</labeL>
-        <input id="password" name="password" type="password" required>
+            <labeL for="password">Password: &nbsp</labeL>
+            <input id="password" name="password" type="password" required>
 
-        <br>
-        <input type="button" value="Login" id="loginBtn">
-    </form>
+            <br>
+            <input type="button" value="Login" id="loginBtn">
+        </form>
 
-    <p>Don't have an account? <a href="./signUp.html">Sign up</a></p>
-
+        <p>Don't have an account? <a href="./signUp.html">Sign up</a></p>
+    </div>
 
     <script>
 
